@@ -5,6 +5,10 @@
 
 #include "Game.h"
 
+// global variables
+const int thickness = 15;
+const float paddleH = 100.0f;
+
 // class member function definition
 
 // if initialization and window creation succeeds function returns true
@@ -41,6 +45,11 @@ bool Game::initialize() {
 		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
 
 	);
+
+	mPaddlePos.x = 10.0f;
+	mPaddlePos.y = 768.0f / 2.0f;
+	mBallPos.x = 1024.0f / 2.0f;
+	mBallPos.y = 768.0f / 2.0f;
 
 	return true;
 }
@@ -87,7 +96,30 @@ void Game::processInput() {
 
 // function to generate output
 void Game::generateOutput() {
-	// back buffer specifying color
+
+	/*
+	* In computer graphics, the color buffer is a location in memory
+	* containing the color information for the entire screen.
+	* The display can use the color buffer for drawing the contents
+	* screen. Think of the color buffer as a two dimensional array,
+	* where each (x,y) index corresponds to a pixel on the screen.
+	* In every frame during the "generate output" phase of the game
+	* loop, the game writes graphical output into the color buffer.
+	*/
+
+	/*
+	* double buffering
+	* 
+	* Rather than having one color buffer that the game and display must
+	* share, you create two seperate color buffers. Then the game and
+	* display alternate between the color buffers they use every frame.
+	* The idea is that with two seperate buffers, the game can write to one
+	* (the back buffer) and, at the same time, the display can read from the
+	* other one (the front buffer). After the frame completes, the game and
+	* display swap their buffers.
+	*/
+
+	// specifying drawing color
 	SDL_SetRenderDrawColor(
 		mRenderer,
 		150,	// R
@@ -96,9 +128,56 @@ void Game::generateOutput() {
 		255		// A
 	);
 
-	// clear back buffer
+	// clear current buffer with drawing color
 	SDL_RenderClear(mRenderer);
 
-	// swap the front and back buffers
+	SDL_SetRenderDrawColor(
+		mRenderer,
+		50,			// R
+		50,			// G
+		255,		// B
+		255			// A
+	);
+
+	// draw top wall
+	SDL_Rect wall{
+		0,			// top left x
+		0,			// top left y
+		1024,		// width
+		thickness	// height
+	};
+	// draw rectangle on current buffer
+	SDL_RenderFillRect(mRenderer, &wall);
+
+	// draw bottom wall
+	wall.y = 768 - thickness;
+	SDL_RenderFillRect(mRenderer, &wall);
+
+	// Draw right wall
+	wall.x = 1024 - thickness;
+	wall.y = 0;
+	wall.w = thickness;
+	wall.h = 1024;
+	SDL_RenderFillRect(mRenderer, &wall);
+
+	// Draw ball
+	SDL_Rect ball{
+		static_cast<int>(mBallPos.x - thickness / 2),
+		static_cast<int>(mBallPos.y - thickness / 2),
+		thickness,
+		thickness
+	};
+	SDL_RenderFillRect(mRenderer, &ball);
+
+	// Draw paddle
+	SDL_Rect paddle{
+		static_cast<int>(mPaddlePos.x),
+		static_cast<int>(mPaddlePos.y - paddleH / 2),
+		thickness,
+		static_cast<int>(paddleH)
+	};
+	SDL_RenderFillRect(mRenderer, &paddle);
+
+	// swap/ update buffer with rendering performed since
 	SDL_RenderPresent(mRenderer);
 }

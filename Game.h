@@ -6,6 +6,12 @@
 #pragma once
 #include <SDL.h>
 
+struct Vector2
+{
+	float x;
+	float y;
+};
+
 // Game class
 class Game {
 public:
@@ -35,4 +41,9 @@ private:
 
 	// renderer
 	SDL_Renderer* mRenderer;
+
+	// position of paddle
+	Vector2 mPaddlePos;
+	// Position of ball
+	Vector2 mBallPos;
 };
