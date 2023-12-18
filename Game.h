@@ -25,11 +25,14 @@ private:
 	// Helper functions for game loop
 	void processInput();
 	//void updateGame();
-	//void generateOutput();
+	void generateOutput();
 
 	// Window by SDL
 	SDL_Window* mWindow;
 
 	// Continue to run?
 	bool mIsRunning;
+
+	// renderer
+	SDL_Renderer* mRenderer;
 };

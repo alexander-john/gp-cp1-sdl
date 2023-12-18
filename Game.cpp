@@ -34,6 +34,14 @@ bool Game::initialize() {
 		return false;
 	}
 
+	// create renderer
+	mRenderer = SDL_CreateRenderer(
+		mWindow,	// window to create renderer for
+		-1,			// usually -1
+		SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
+
+	);
+
 	return true;
 }
 
@@ -41,6 +49,7 @@ bool Game::initialize() {
 void Game::shutdown() {
 	SDL_DestroyWindow(mWindow);
 	SDL_Quit();
+	SDL_DestroyRenderer(mRenderer);
 }
 
 // function keeps running iterations of the game loop until 
@@ -49,7 +58,7 @@ void Game::runLoop() {
 	while (mIsRunning) {
 		processInput();
 		//updateGame();
-		//generateOutput();
+		generateOutput();
 	}
 }
 
@@ -74,4 +83,22 @@ void Game::processInput() {
 	if (state[SDL_SCANCODE_ESCAPE]) {
 		mIsRunning = false;
 	}
+}
+
+// function to generate output
+void Game::generateOutput() {
+	// back buffer specifying color
+	SDL_SetRenderDrawColor(
+		mRenderer,
+		150,	// R
+		50,		// G
+		55,		// B
+		255		// A
+	);
+
+	// clear back buffer
+	SDL_RenderClear(mRenderer);
+
+	// swap the front and back buffers
+	SDL_RenderPresent(mRenderer);
 }
