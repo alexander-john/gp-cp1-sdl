@@ -10,6 +10,15 @@ const int thickness = 15;
 const float paddleH = 100.0f;
 
 // class member function definition
+Game::Game()
+	:mWindow(nullptr)
+	, mRenderer(nullptr)
+	, mTicksCount(0)
+	, mIsRunning(true)
+	, mPaddleDir(0)
+{
+
+}
 
 // if initialization and window creation succeeds function returns true
 bool Game::initialize() {
@@ -46,6 +55,12 @@ bool Game::initialize() {
 
 	);
 
+	if (!mRenderer)
+	{
+		SDL_Log("Failed to create renderer: %s", SDL_GetError());
+		return false;
+	}
+
 	mPaddlePos.x = 10.0f;
 	mPaddlePos.y = 768.0f / 2.0f;
 	mBallPos.x = 1024.0f / 2.0f;
@@ -57,8 +72,8 @@ bool Game::initialize() {
 // function destroys the SDL_Window and closes SDL
 void Game::shutdown() {
 	SDL_DestroyWindow(mWindow);
-	SDL_Quit();
 	SDL_DestroyRenderer(mRenderer);
+	SDL_Quit();
 }
 
 // function keeps running iterations of the game loop until 
@@ -66,7 +81,7 @@ void Game::shutdown() {
 void Game::runLoop() {
 	while (mIsRunning) {
 		processInput();
-		//updateGame();
+		updateGame();
 		generateOutput();
 	}
 }
@@ -91,6 +106,17 @@ void Game::processInput() {
 	// if escape is pressed, also end loop
 	if (state[SDL_SCANCODE_ESCAPE]) {
 		mIsRunning = false;
+	}
+
+	// Update paddle direction based on W/S keys
+	mPaddleDir = 0;
+	if (state[SDL_SCANCODE_W])
+	{
+		mPaddleDir -= 1;
+	}
+	if (state[SDL_SCANCODE_S])
+	{
+		mPaddleDir += 1;
 	}
 }
 
@@ -180,4 +206,38 @@ void Game::generateOutput() {
 
 	// swap/ update buffer with rendering performed since
 	SDL_RenderPresent(mRenderer);
+}
+
+void Game::updateGame() {
+	// Wait until 16ms has elapsed since last frame
+	while (!SDL_TICKS_PASSED(SDL_GetTicks(), mTicksCount + 16))
+		;
+
+	// Delta time is the difference in ticks from last frame
+	// (converted to seconds)
+	float deltaTime = (SDL_GetTicks() - mTicksCount) / 1000.0f;
+
+	// Clamp maximum delta time value
+	if (deltaTime > 0.05f)
+	{
+		deltaTime = 0.05f;
+	}
+
+	// Update tick counts (for next frame)
+	mTicksCount = SDL_GetTicks();
+
+	// Update paddle position based on direction
+	if (mPaddleDir != 0)
+	{
+		mPaddlePos.y += mPaddleDir * 300.0f * deltaTime;
+		// Make sure paddle doesn't move off screen!
+		if (mPaddlePos.y < (paddleH / 2.0f + thickness))
+		{
+			mPaddlePos.y = paddleH / 2.0f + thickness;
+		}
+		else if (mPaddlePos.y > (768.0f - paddleH / 2.0f - thickness))
+		{
+			mPaddlePos.y = 768.0f - paddleH / 2.0f - thickness;
+		}
+	}
 }
